@@ -1,95 +1,163 @@
-
 import os
+import json
+from datetime import datetime, timedelta
 
-# Function to display the menu
+class Task:
+    def __init__(self, description, due_date=None, priority="Medium", completed=False):
+        self.description = description
+        self.due_date = due_date
+        self.priority = priority
+        self.completed = completed
+        self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def to_dict(self):
+        return {
+            "description": self.description,
+            "due_date": self.due_date,
+            "priority": self.priority,
+            "completed": self.completed,
+            "created_at": self.created_at
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        task = cls(data["description"])
+        task.due_date = data["due_date"]
+        task.priority = data["priority"]
+        task.completed = data["completed"]
+        task.created_at = data["created_at"]
+        return task
+
+class ToDoList:
+    def __init__(self):
+        self.tasks = []
+        self.filename = "tasks.json"
+        self.load_tasks()
+
+    def add_task(self):
+        description = input("Enter task description: ")
+        due_date = input("Enter due date (YYYY-MM-DD) or press Enter for no due date: ")
+        priority = input("Enter priority (High/Medium/Low) [Medium]: ").capitalize() or "Medium"
+        
+        if due_date:
+            try:
+                due_date = datetime.strptime(due_date, "%Y-%m-%d").date().isoformat()
+            except ValueError:
+                print("Invalid date format. Task will be created without a due date.")
+                due_date = None
+
+        task = Task(description, due_date, priority)
+        self.tasks.append(task)
+        self.save_tasks()
+        print(f"Task '{description}' added successfully!")
+
+    def view_tasks(self):
+        if not self.tasks:
+            print("No tasks to show!")
+            return
+
+        sort_by = input("Sort by (date/priority/none) [none]: ").lower() or "none"
+        if sort_by == "date":
+            self.tasks.sort(key=lambda x: (x.due_date is None, x.due_date))
+        elif sort_by == "priority":
+            priority_order = {"High": 0, "Medium": 1, "Low": 2}
+            self.tasks.sort(key=lambda x: priority_order[x.priority])
+
+        print("\nYour Tasks:")
+        for idx, task in enumerate(self.tasks, 1):
+            status = "✓" if task.completed else "✗"
+            due = f"Due: {task.due_date}" if task.due_date else "No due date"
+            print(f"{idx}. [{status}] {task.description} - Priority: {task.priority}, {due}")
+
+    def remove_task(self):
+        if not self.tasks:
+            print("No tasks to remove!")
+            return
+
+        self.view_tasks()
+        try:
+            task_num = int(input("Enter the task number to remove: "))
+            if 0 < task_num <= len(self.tasks):
+                removed_task = self.tasks.pop(task_num - 1)
+                self.save_tasks()
+                print(f"Task '{removed_task.description}' removed successfully!")
+            else:
+                print("Invalid task number!")
+        except ValueError:
+            print("Please enter a valid number!")
+
+    def mark_completed(self):
+        if not self.tasks:
+            print("No tasks to mark as completed!")
+            return
+
+        self.view_tasks()
+        try:
+            task_num = int(input("Enter the task number to mark as completed: "))
+            if 0 < task_num <= len(self.tasks):
+                task = self.tasks[task_num - 1]
+                task.completed = True
+                self.save_tasks()
+                print(f"Task '{task.description}' marked as completed!")
+            else:
+                print("Invalid task number!")
+        except ValueError:
+            print("Please enter a valid number!")
+
+    def save_tasks(self):
+        with open(self.filename, "w") as file:
+            json.dump([task.to_dict() for task in self.tasks], file, indent=2)
+
+    def load_tasks(self):
+        if os.path.exists(self.filename):
+            with open(self.filename, "r") as file:
+                data = json.load(file)
+                self.tasks = [Task.from_dict(task_data) for task_data in data]
+
+    def show_statistics(self):
+        total_tasks = len(self.tasks)
+        completed_tasks = sum(1 for task in self.tasks if task.completed)
+        pending_tasks = total_tasks - completed_tasks
+        
+        print("\nTask Statistics:")
+        print(f"Total tasks: {total_tasks}")
+        print(f"Completed tasks: {completed_tasks}")
+        print(f"Pending tasks: {pending_tasks}")
+        
+        if total_tasks > 0:
+            completion_rate = (completed_tasks / total_tasks) * 100
+            print(f"Completion rate: {completion_rate:.2f}%")
+
+        overdue_tasks = sum(1 for task in self.tasks if task.due_date and not task.completed and datetime.strptime(task.due_date, "%Y-%m-%d").date() < datetime.now().date())
+        print(f"Overdue tasks: {overdue_tasks}")
+
 def display_menu():
     print("\n---- To-Do List ----")
     print("1. Add Task")
     print("2. View Tasks")
     print("3. Remove Task")
-    print("4. Edit Task")
-    print("5. Exit")
+    print("4. Mark Task as Completed")
+    print("5. Show Statistics")
+    print("6. Exit")
 
-# Function to add a task
-def add_task(tasks):
-    task = input("Enter the task: ")
-    tasks.append(task)
-    save_tasks(tasks)
-    print(f"Task '{task}' added successfully!")
-
-# Function to view all tasks
-def view_tasks(tasks):
-    if not tasks:
-        print("No tasks to show!")
-    else:
-        print("\nYour Tasks:")
-        for idx, task in enumerate(tasks, 1):
-            print(f"{idx}. {task}")
-
-# Function to remove a task
-def remove_task(tasks):
-    if not tasks:
-        print("No tasks to remove!")
-    else:
-        view_tasks(tasks)
-        try:
-            task_num = int(input("Enter the task number to remove: "))
-            if 0 < task_num <= len(tasks):
-                removed_task = tasks.pop(task_num - 1)
-                save_tasks(tasks)
-                print(f"Task '{removed_task}' removed successfully!")
-            else:
-                print("Invalid task number!")
-        except ValueError:
-            print("Please enter a valid number!")
-
-# Function to edit a task
-def edit_task(tasks):
-    if not tasks:
-        print("No tasks to edit!")
-    else:
-        view_tasks(tasks)
-        try:
-            task_num = int(input("Enter the task number to edit: "))
-            if 0 < task_num <= len(tasks):
-                new_task = input("Enter the new task: ")
-                tasks[task_num - 1] = new_task
-                save_tasks(tasks)
-                print(f"Task {task_num} edited successfully!")
-            else:
-                print("Invalid task number!")
-        except ValueError:
-            print("Please enter a valid number!")
-
-# Function to save tasks to a file
-def save_tasks(tasks):
-    with open("tasks.txt", "w") as file:
-        for task in tasks:
-            file.write(task + "\n")
-
-# Function to load tasks from a file
-def load_tasks():
-    if os.path.exists("tasks.txt"):
-        with open("tasks.txt", "r") as file:
-            tasks = [line.strip() for line in file.readlines()]
-        return tasks
-    return []
-
-# Main function
 def main():
-    tasks = load_tasks()
+    todo_list = ToDoList()
+    
     while True:
         display_menu()
         choice = input("Enter your choice: ")
+        
         if choice == '1':
-            add_task(tasks)
+            todo_list.add_task()
         elif choice == '2':
-            view_tasks(tasks)
+            todo_list.view_tasks()
         elif choice == '3':
-            remove_task(tasks)
+            todo_list.remove_task()
         elif choice == '4':
-            edit_task(tasks)
+            todo_list.mark_completed()
         elif choice == '5':
+            todo_list.show_statistics()
+        elif choice == '6':
             print("Exiting To-Do List. Goodbye!")
             break
         else:
