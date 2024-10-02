@@ -1,3 +1,4 @@
+
 import os
 
 # Function to display the menu
@@ -6,7 +7,8 @@ def display_menu():
     print("1. Add Task")
     print("2. View Tasks")
     print("3. Remove Task")
-    print("4. Exit")
+    print("4. Edit Task")
+    print("5. Exit")
 
 # Function to add a task
 def add_task(tasks):
@@ -41,6 +43,24 @@ def remove_task(tasks):
         except ValueError:
             print("Please enter a valid number!")
 
+# Function to edit a task
+def edit_task(tasks):
+    if not tasks:
+        print("No tasks to edit!")
+    else:
+        view_tasks(tasks)
+        try:
+            task_num = int(input("Enter the task number to edit: "))
+            if 0 < task_num <= len(tasks):
+                new_task = input("Enter the new task: ")
+                tasks[task_num - 1] = new_task
+                save_tasks(tasks)
+                print(f"Task {task_num} edited successfully!")
+            else:
+                print("Invalid task number!")
+        except ValueError:
+            print("Please enter a valid number!")
+
 # Function to save tasks to a file
 def save_tasks(tasks):
     with open("tasks.txt", "w") as file:
@@ -58,11 +78,9 @@ def load_tasks():
 # Main function
 def main():
     tasks = load_tasks()
-    
     while True:
         display_menu()
         choice = input("Enter your choice: ")
-        
         if choice == '1':
             add_task(tasks)
         elif choice == '2':
@@ -70,6 +88,8 @@ def main():
         elif choice == '3':
             remove_task(tasks)
         elif choice == '4':
+            edit_task(tasks)
+        elif choice == '5':
             print("Exiting To-Do List. Goodbye!")
             break
         else:
