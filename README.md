@@ -11,9 +11,3 @@ This is a simple command-line To-Do List application written in Python. The appl
 ## Requirements
 - Python 3.x
 
-## How to Run
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/todo-list-app.git
