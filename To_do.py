@@ -1,3 +1,4 @@
+
 import os
 
 
@@ -81,6 +82,24 @@ def remove_task(tasks):
                    print(f"Task '{removed_task}' removed successfully!")
                 else:
                     print("Task removal canceled.")
+            else:
+                print("Invalid task number!")
+        except ValueError:
+            print("Please enter a valid number!")
+
+# Function to edit a task
+def edit_task(tasks):
+    if not tasks:
+        print("No tasks to edit!")
+    else:
+        view_tasks(tasks)
+        try:
+            task_num = int(input("Enter the task number to edit: "))
+            if 0 < task_num <= len(tasks):
+                new_task = input("Enter the new task: ")
+                tasks[task_num - 1] = new_task
+                save_tasks(tasks)
+                print(f"Task {task_num} edited successfully!")
             else:
                 print("Invalid task number!")
         except ValueError:
