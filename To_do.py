@@ -96,8 +96,21 @@ def edit_task(tasks):
         try:
             task_num = int(input("Enter the task number to edit: "))
             if 0 < task_num <= len(tasks):
-                new_task = input("Enter the new task: ")
-                tasks[task_num - 1] = new_task
+                # Get current task details
+                current_task = tasks[task_num - 1]
+                
+                # Edit task description
+                new_task = input(f"Enter the new task (leave blank to keep '{current_task['task']}'): ")
+                if new_task:
+                    current_task['task'] = new_task
+
+                # Edit task deadline
+                new_deadline = input(f"Enter new deadline (dd-mm-yyyy) or press Enter to keep current deadline ({current_task['deadline']}): ")
+                if new_deadline:
+                    try:
+                        current_task['deadline'] = datetime.strptime(new_deadline, "%d-%m-%Y").date()
+                    except ValueError:
+                        print("Invalid date format! Deadline unchanged.")
                 save_tasks(tasks)
                 print(f"Task {task_num} edited successfully!")
             else:
