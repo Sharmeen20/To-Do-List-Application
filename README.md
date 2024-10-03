@@ -1,18 +1,13 @@
 # To-Do-List-Application
 
-This To-Do List Application is a command-line tool designed to help users manage their tasks efficiently. Built with Python, it offers a range of features to create, view, and manage tasks with ease.
+This is a simple command-line To-Do List application written in Python. The application allows users to add, view, and remove tasks. All tasks are saved to a text file (`tasks.txt`) so that they persist even after the program is closed.
 
 ## Features
-- Add tasks with descriptions, due dates, and priority levels
-- View tasks with optional sorting by date or priority
+- Add tasks
+- View all tasks
 - Remove tasks
-- Mark tasks as completed
-- View task statistics
-- Persistent storage using JSON
-- User-friendly command-line interface
+- Tasks are saved in a text file for persistence
 
 ## Requirements
 - Python 3.x
 
-## Data Storage
-The application stores tasks in a file named ```tasks.json``` in the same directory as the script. This ensures that your tasks persist between sessions.
