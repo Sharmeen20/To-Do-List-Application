@@ -41,12 +41,13 @@ def add_task(tasks):
 def view_tasks(tasks):
     if not tasks:
         print("No tasks to show!")
-    else:
-        print("\nYour Tasks:")
-        for idx, task_info in enumerate(tasks, 1):
-            task_status = "[✔]" if task_info['completed'] else "[ ]"
-            deadline = f"(Deadline: {task_info['deadline']})" if task_info['deadline'] else ""
-            print(f"{idx}. {task_status} {task_info['task']} {deadline}")
+        return
+
+    print("\nYour Tasks:")
+    for idx, task_info in enumerate(tasks, 1):
+        task_status = "[✔]" if task_info['completed'] else "[ ]"
+        deadline = f"(Deadline: {task_info['deadline']})" if task_info['deadline'] else ""
+        print(f"{idx}. {task_status} {task_info['task']} {deadline}")
 
 
 def mark_task_completed(tasks):
@@ -55,14 +56,16 @@ def mark_task_completed(tasks):
         return
 
     view_tasks(tasks)
-    try:
-        task_num = int(input("Enter the task number to mark as completed: "))
+    task_num = input("Enter the task number to mark as completed: ")
+
+    if task_num.isdigit():
+        task_num = int(task_num)
         if 0 < task_num <= len(tasks):
             tasks[task_num - 1]['completed'] = True
             print(f"Task '{tasks[task_num - 1]['task']}' marked as completed!")
         else:
             print("Invalid task number!")
-    except ValueError:
+    else:
         print("Please enter a valid number!")
 
 
