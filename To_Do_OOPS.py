@@ -132,36 +132,17 @@ class ToDoList:
         print(f"Overdue tasks: {overdue_tasks}")
 
 def display_menu():
-    print("\n---- To-Do List ----")
-    print("1. Add Task")
-    print("2. View Tasks")
-    print("3. Remove Task")
-    print("4. Mark Task as Completed")
-    print("5. Show Statistics")
-    print("6. Exit")
+    print("\n---- To-Do List ----""\n1. Add Task""\n2. View Tasks""\n3. Remove Task""\n4. Mark Task as Completed""\n5. Show Statistics""\n6. Exit")
 
 def main():
     todo_list = ToDoList()
-    
+    menu_options = {'1': todo_list.add_task, '2': todo_list.view_tasks, '3': todo_list.remove_task,
+                    '4': todo_list.mark_completed, '5': todo_list.show_statistics,
+                    '6': lambda: [print("Exiting To-Do List. Goodbye!"), exit()]}
     while True:
         display_menu()
         choice = input("Enter your choice: ")
-        
-        if choice == '1':
-            todo_list.add_task()
-        elif choice == '2':
-            todo_list.view_tasks()
-        elif choice == '3':
-            todo_list.remove_task()
-        elif choice == '4':
-            todo_list.mark_completed()
-        elif choice == '5':
-            todo_list.show_statistics()
-        elif choice == '6':
-            print("Exiting To-Do List. Goodbye!")
-            break
-        else:
-            print("Invalid choice! Please try again.")
+        (menu_options.get(choice, lambda: print("Invalid choice! Please try again.")))()
 
 if __name__ == "__main__":
     main()
