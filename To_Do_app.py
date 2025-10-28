@@ -1,62 +1,67 @@
 import streamlit as st
 import os
 
-st.markdown("<h2 style='text-align: center;'>To-Do App</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>📝 To-Do App</h2>", unsafe_allow_html=True)
 
-taskbox = st.selectbox('Select a task', ['Add Task', 'Update Task', 'Remove Task', 'View Tasks'])
+task_file = 'tasks.txt'
+
+# Ensure task file exists
+if not os.path.exists(task_file):
+    open(task_file, 'w').close()
+
+taskbox = st.selectbox('Choose an action:', ['Add Task', 'Update Task', 'Remove Task', 'View Tasks'])
+
+def load_tasks():
+    with open(task_file, 'r') as file:
+        return [task.strip() for task in file.readlines() if task.strip()]
+
+def save_tasks(tasks):
+    with open(task_file, 'w') as file:
+        for task in tasks:
+            file.write(task + '\n')
 
 if taskbox == 'Add Task':
-    add_task = st.text_input('Enter the task: ')
-    if st.button("Submit"):
-        if add_task:
-            with open('tasks.txt', 'a') as file:
-                file.write(add_task + '\n')
-            st.success("Task added successfully!")
+    add_task = st.text_input('Enter a new task:')
+    if st.button("➕ Add Task"):
+        if add_task.strip():
+            tasks = load_tasks()
+            tasks.append(add_task.strip())
+            save_tasks(tasks)
+            st.success("✅ Task added successfully!")
         else:
-            st.error("Please enter some text.")
+            st.error("⚠️ Please enter a valid task.")
 
 elif taskbox == 'View Tasks':
-    if os.path.exists('tasks.txt'):
-        with open('tasks.txt', 'r') as file:
-            tasks = file.readlines()
-        if tasks:
-            st.write("Tasks:")
-            for task in tasks:
-                st.write(task.strip())
-        else:
-            st.write("No tasks found.")
+    tasks = load_tasks()
+    if tasks:
+        st.markdown(f"### 📋 You have {len(tasks)} task(s):")
+        for i, task in enumerate(tasks, 1):
+            st.write(f"{i}. {task}")
     else:
-        st.write("No tasks found.")
+        st.info("📭 No tasks found.")
 
 elif taskbox == 'Remove Task':
-    if os.path.exists('tasks.txt'):
-        with open('tasks.txt', 'r') as file:
-            tasks = file.readlines()
-        if tasks:
-            task_to_remove = st.selectbox('Select a task to remove', [task.strip() for task in tasks])
-            if st.button("Remove Task"):
-                tasks = [task for task in tasks if task.strip() != task_to_remove]
-                with open('tasks.txt', 'w') as file:
-                    file.writelines(tasks)
-                st.success(f"Task '{task_to_remove}' removed successfully!")
-        else:
-            st.write("No tasks found.")
+    tasks = load_tasks()
+    if tasks:
+        task_to_remove = st.selectbox('Select a task to remove:', tasks)
+        if st.button("🗑️ Remove Task"):
+            tasks = [task for task in tasks if task != task_to_remove]
+            save_tasks(tasks)
+            st.success(f"✅ Task '{task_to_remove}' removed successfully!")
     else:
-        st.write("No tasks found.")
+        st.info("📭 No tasks to remove.")
 
 elif taskbox == 'Update Task':
-    if os.path.exists('tasks.txt'):
-        with open('tasks.txt', 'r') as file:
-            tasks = file.readlines()
-        if tasks:
-            task_to_update = st.selectbox('Select a task to update', [task.strip() for task in tasks])
-            updated_task = st.text_input('Enter the updated task: ')
-            if st.button("Update Task"):
-                tasks = [updated_task + '\n' if task.strip() == task_to_update else task for task in tasks]
-                with open('tasks.txt', 'w') as file:
-                    file.writelines(tasks)
-                st.success(f"Task '{task_to_update}' updated successfully!")
-        else:
-            st.write("No tasks found.")
+    tasks = load_tasks()
+    if tasks:
+        task_to_update = st.selectbox('Select a task to update:', tasks)
+        updated_task = st.text_input('Enter the updated task:')
+        if st.button("✏️ Update Task"):
+            if updated_task.strip():
+                tasks = [updated_task.strip() if task == task_to_update else task for task in tasks]
+                save_tasks(tasks)
+                st.success(f"✅ Task '{task_to_update}' updated successfully!")
+            else:
+                st.error("⚠️ Please enter a valid updated task.")
     else:
-        st.write("No tasks found.")
+        st.info("📭 No tasks to update.")
